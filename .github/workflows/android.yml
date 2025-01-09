@@ -38,14 +38,26 @@ jobs:
           ruby-version: '3.1.2'
           bundler-cache: true
 
-      - name: Install fastlane
+      - name: Install Bundler and fastlane
         working-directory: ./android
         run: |
-          gem install fastlane -NV
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      - name: Make gradlew executable
+        run: chmod +x ./android/gradlew
+
+      - name: Install Android dependencies
+        working-directory: ./android
+        run: ./gradlew dependencies --no-daemon
 
       - name: Build APK
         run: |
-          cd android && bundle exec fastlane deploy  #
+          cd android && bundle exec fastlane beta
+
+      - name: List APK output directory
+        run: ls -R android/app/build/outputs/apk/
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v3
