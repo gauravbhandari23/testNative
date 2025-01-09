@@ -42,18 +42,10 @@ jobs:
         working-directory: ./android
         run: |
           gem install fastlane -NV
-          
-
-      # - name: Make gradlew executable
-      #   run: chmod +x ./android/gradlew
-
-      # - name: Install Android dependencies
-      #   working-directory: ./android
-      #   run: ./gradlew dependencies --no-daemon
 
       - name: Build APK
         run: |
-          cd android fastlane build
+          cd android && fastlane build
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v3
