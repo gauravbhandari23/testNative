@@ -47,7 +47,7 @@ jobs:
         run: cd android && ./gradlew dependencies
 
       - name: Build APK
-        run: bundle exec fastlane android build_apk
+        run: fastlane beta
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v3
