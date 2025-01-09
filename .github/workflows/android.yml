@@ -45,7 +45,7 @@ jobs:
 
       - name: Build APK
         run: |
-          cd android && fastlane build
+          cd android && bundle exec fastlane deploy  #
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v3
