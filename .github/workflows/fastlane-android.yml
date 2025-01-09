@@ -37,17 +37,17 @@ jobs:
       - name: Install Bundler
         run: gem install bundler
 
-      - name: Install fastlane
-        run: gem install fastlane
+      - name: Install fastlane dependencies
+        run: bundle install
 
       - name: Make gradlew executable
         run: chmod +x ./android/gradlew
 
       - name: Install Android dependencies
-        run: cd android && ./gradlew dependencies
+        run: cd android && ./gradlew dependencies --no-daemon
 
       - name: Build APK
-        run: fastlane beta
+        run: bundle exec fastlane beta
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v3
