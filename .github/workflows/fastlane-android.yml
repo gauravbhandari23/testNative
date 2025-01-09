@@ -1,57 +1,45 @@
-name: Fastlane Android CI
-
+name: Android CI
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
+ push:
+ branches:
+ - main
+ pull_request:
+ branches:
+ - main
 jobs:
-  android:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install Node.js dependencies
-        run: npm install
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.1.2'
-
-      - name: Install Bundler
-        run: gem install bundler
-
-      - name: Install fastlane dependencies
-        run: bundle install
-
-      - name: Make gradlew executable
-        run: chmod +x ./android/gradlew
-
-      - name: Install Android dependencies
-        run: cd android && ./gradlew dependencies --no-daemon
-
-      - name: Build APK
-        run: bundle exec fastlane beta
-
-      - name: Upload APK as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-release
-          path: android/app/build/outputs/apk/release/app-release.apk
-          
+ build:
+ name: Build Android App
+ runs-on: ubuntu-latest
+steps:
+ # Checkout the code
+ - name: Checkout code
+ uses: actions/checkout@v3
+# Set up Node.js environment
+ - name: Set up Node.js
+ uses: actions/setup-node@v3
+ with:
+ node-version: '18'
+# Install dependencies
+ - name: Install dependencies
+ run: npm install
+# Set up JDK for Android build
+ - name: Set up JDK 11
+ uses: actions/setup-java@v3
+ with:
+ distribution: 'adopt'
+ java-version: '11'
+# Set up Android SDK
+ - name: Install Android SDK
+ uses: android-actions/setup-android@v2
+ with:
+ api-level: 30
+ build-tools-version: 30.0.3
+# Build the Android app
+ - name: Build Android App
+ run: ./gradlew assembleRelease
+# Optional: Upload APK as an artifact
+ - name: Upload APK
+ uses: actions/upload-artifact@v3
+ with:
+ name: app-release.apk
+ path: android/app/build/outputs/apk/release/app-release.apk
