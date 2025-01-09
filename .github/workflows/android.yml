@@ -1,0 +1,57 @@
+name: Fastlane Android CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Node.js dependencies
+        run: npm install
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1.2'
+
+      - name: Install Bundler
+        run: gem install bundler
+
+      - name: Install fastlane dependencies
+        run: bundle install
+
+      - name: Make gradlew executable
+        run: chmod +x ./android/gradlew
+
+      - name: Install Android dependencies
+        run: cd android && ./gradlew dependencies --no-daemon
+
+      - name: Build APK
+        run: cd android bundle exec fastlane beta
+
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: android/app/build/outputs/apk/release/app-release.apk
+          
