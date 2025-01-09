@@ -21,37 +21,43 @@ jobs:
           node-version: '18'
 
       - name: Install Node.js dependencies
-        run: npm install
+        run: |
+          npm install
+          cd android && npm install
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: gradle
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1.2'
+          bundler-cache: true
 
-      - name: Install Bundler
-        run: gem install bundler
-
-      - name: Install fastlane dependencies
-        run: bundle install
+      - name: Install Bundler and fastlane
+        working-directory: ./android
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
 
       - name: Make gradlew executable
         run: chmod +x ./android/gradlew
 
       - name: Install Android dependencies
-        run: cd android && ./gradlew dependencies --no-daemon
+        working-directory: ./android
+        run: ./gradlew dependencies --no-daemon
 
       - name: Build APK
-        run: cd android bundle exec fastlane beta
+        run: |
+          cd android && bundle exec fastlane beta
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: app-release
-          path: android/app/build/outputs/apk/release/app-release.apk
-          
+          name: app-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
