@@ -1,48 +1,47 @@
-name: Fastlane Android CI
+name: React Native Android CI/CD with Fastlane
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the workflow when pushing to the main branch
   pull_request:
     branches:
-      - main
+      - main  # Trigger on PR creation to the main branch
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
 
 jobs:
-  android:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest  # Use Ubuntu to build Android APK
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          java-version: '11'
-          distribution: 'temurin'
+          node-version: '16'  # Choose the appropriate Node.js version
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Set up Android SDK
+      - name: Set up Android SDK
+        uses: reactivecircus/android-sdk-installer-action@v2
         with:
-          ruby-version: '3.1.2'
+          api-level: 30  # Specify the API level you need
 
-      - name: Install Bundler
-        run: gem install bundler
+      
+      # Step 6: Install Fastlane
+      - name: Install Fastlane
+        run: |
+          gem install fastlane
 
-      - name: Install fastlane
-        run: gem install fastlane
-
-      - name: Make gradlew executable
-        run: chmod +x ./android/gradlew
-
-      - name: Install Android dependencies
-        run: cd android && ./gradlew dependencies
-
-      - name: Build APK
-        run: fastlane android build_apk
-
-      - name: Upload APK as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-release
-          path: android/app/build/outputs/apk/release/app-release.apk
+      # Step 7: Run Fastlane to build the APK
+      - name: Build release APK with Fastlane
+        run: |
+          cd android
+          fastlane build_release  # Trigger the Fastlane lane to build APK
